@@ -25,9 +25,9 @@ def load_contacts():
             for row in reader:
                 contact_listbox.insert(END, f"{row[0]}, {row[1]}")
     except FileNotFoundError:
-        contact_listbox.insert(END, "Contact not found.")
+        pass
 
-
+#allows the user to select a contact
 def select_contact(event):
     try:
         selected_contact = contact_listbox.get(contact_listbox.curselection())
@@ -39,7 +39,7 @@ def select_contact(event):
     except IndexError:
         pass
 
-
+#allows the user to updates the contact
 def update_contact():
     selected_index = contact_listbox.curselection()
     if not selected_index:
@@ -64,17 +64,37 @@ def update_contact():
     
     load_contacts()
 
+#creates delete function
+def delete_contact():
+    select_contact = contact_listbox.curselection()
+    if not select_contact:
+        return
+
+    contacts = []
+    with open('contacts.csv', mode='r') as file:
+        reader = csv.reader(file)
+        contacts = list(reader)
+    del contacts[select_contact[0]]
+
+    with open('contacts.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(contacts)
+
+    name_entry.delete(0, END)
+    phone_entry.delete(0, END)
+
+    load_contacts()
 
 window = Tk()
 window.title("Contact Book")
-window.geometry("600x400")
+window.geometry("400x400")
 
 #Creates the Name and Phone labels and entry boxes
-Label(window, text="Name").grid(row=0, column=0, padx=10, pady=10)
+Label(window, text="Name:").grid(row=0, column=0, padx=10, pady=10)
 name_entry = Entry(window)
 name_entry.grid(row=0, column=1, padx=10, pady=10)
 
-Label(window, text="Phone").grid(row=1, column=0, padx=10, pady=10)
+Label(window, text="Phone:").grid(row=1, column=0, padx=10, pady=10)
 phone_entry = Entry(window)
 phone_entry.grid(row=1, column=1, padx=10, pady=10)
 
@@ -90,6 +110,10 @@ save_button.grid(row=3, column=0, columnspan=2, pady=10)
 #adds the update button
 update_button = Button(window, text="Update Contact", command=update_contact)
 update_button.grid(row=4, column=0, columnspan=2, pady=10)
+
+#delete button
+delete_button = Button(window, text="Delete Contact", command=delete_contact)
+delete_button.grid(row=5, column=0, columnspan=2, pady=10)
 
 load_contacts()
 
